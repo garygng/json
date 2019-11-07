@@ -1,0 +1,72 @@
+Index: lib/main.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- lib/main.dart	(date 1573112183000)
++++ lib/main.dart	(date 1573115766000)
+@@ -29,6 +29,8 @@
+ }
+ 
+ class _MyHomePageState extends State<MyHomePage> {
++  List data;
++
+   @override
+   void initState() {
+     // TODO: implement initState
+@@ -37,7 +39,7 @@
+     this.getJSONData();
+   }
+ 
+-  void getJSONData() async {
++  Future<String> getJSONData() async {
+     // This example uses the Google Books API to search for books about http.
+     // https://developers.google.com/books/docs/overview
+     ////var url = "https://www.googleapis.com/books/v1/volumes?q={http}";
+@@ -48,7 +50,11 @@
+       var jsonResponse = convert.jsonDecode(response.body);
+       ////var itemCount = jsonResponse['totalItems'];
+       ////print("Number of books about http: $itemCount.");
+-      print("jsonResponse: $jsonResponse.");
++      setState(() {
++        data = jsonResponse['results'];
++      });
++      return "sucessful";
++      //print("jsonResponse: $jsonResponse.");
+     } else {
+       print("Request failed with status: ${response.statusCode}.");
+     }
+@@ -75,26 +81,27 @@
+   Widget _buildListView() {
+     return ListView.builder(
+       padding: const EdgeInsets.all(16.0),
+-      itemCount: 10,
++      itemCount: data == null ? 0 : data.length,
+       itemBuilder: (context, index) {
+-        return _buildImageColumn();
++        return _buildImageColumn(data[index]);
+       },
+     );
+   }
+ 
+-  Widget _buildImageColumn() => Container(
++  Widget _buildImageColumn(item) => Container(
+         decoration: BoxDecoration(color: Colors.blue[50]),
+         margin: const EdgeInsets.all(8),
+         child: Column(
+           children: <Widget>[
+             CachedNetworkImage(
+-              imageUrl: "http://via.placeholder.com/350x150",
++              imageUrl: item['urls']['small'],
+               placeholder: (context, url) => CircularProgressIndicator(),
+               errorWidget: (context, url, error) => Icon(Icons.error),
+             ),
+             ListTile(
+-              title: Text("Data"),
+-              subtitle: Text("likes: 1"),
++              title: Text(item['user']['name']),
++              subtitle: Text(item['likes'].toString()),
++              trailing: Icon(Icons.favorite),
+             ),
+           ],
+         ),
